@@ -13,13 +13,7 @@ effects.effects.show = function (element, callbackFunction) {
         return;
     }
 
-    var elementComputedStyle = window.getComputedStyle(element),
-        initialDisplay       = elementComputedStyle.display || '';
+    element.style.display = '';
 
-    if (initialDisplay === 'none') {
-        element.style.display = '';
-    }
-
-    // Fix to the 'display none & transform' bug.
-    setTimeout(callbackFunction, 50);
+    setTimeout(callbackFunction, 10);
 };

@@ -15,5 +15,5 @@ effects.effects.hide = function (element, callbackFunction) {
 
     element.style.display = 'none';
 
-    callbackFunction();
+    setTimeout(callbackFunction, 10);
 };

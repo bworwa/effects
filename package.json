@@ -3,11 +3,13 @@
     "version": "0.0.1",
     "description": "A lightweight, stand-alone JS effects library.",
     "author": "Benjamín Worwa",
+    "repository": "https://github.com/bworwa/effects.git",
     "license": "MIT",
     "devDependencies": {
         "grunt": "latest",
         "grunt-contrib-jshint": "latest",
         "grunt-contrib-concat": "latest",
+        "grunt-contrib-uglify": "latest",
         "grunt-contrib-watch": "latest"
     }
 }

@@ -7,25 +7,29 @@ effects.effects.fadeOut = function (element, duration, callbackFunction) {
         return;
     }
 
+    if (typeof duration === 'function') {
+        callbackFunction = duration;
+        duration = undefined;
+    }
+
     callbackFunction = callbackFunction || effects.defaults.callbackFunction;
 
     if (!effects.utils.isValidCallbackFunction(callbackFunction)) {
         return;
     }
 
-    var elementComputedStyle = window.getComputedStyle(element),
-        initialTransition    = elementComputedStyle.transition || 'initial',
-        terminate            = function () {
+    var terminate = function () {
             element.removeEventListener('transitionend', terminate, false);
-            element.style.transition = initialTransition;
-            effects.effects.hide(element);
-            callbackFunction();
+            element.style.transition = '';
+            effects.effects.hide(element, callbackFunction);
         };
 
-    duration = parseFloat(duration) || 2.5;
+    element.addEventListener('transitionend', terminate, false);
+
+    duration = parseFloat(duration) || 1;
 
     element.style.transition = 'opacity ' + duration + 's linear';
-    element.style.opacity = 0;
-
-    element.addEventListener('transitionend', terminate, false);
+    setTimeout(function () {
+        element.style.opacity = 0;
+    }, 10);
 };

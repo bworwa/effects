@@ -104,7 +104,7 @@ effects.effects.hide = function (element, callbackFunction) {
 
     element.style.display = 'none';
 
-    callbackFunction();
+    setTimeout(callbackFunction, 10);
 };
 
 /*global effects */
@@ -122,15 +122,9 @@ effects.effects.show = function (element, callbackFunction) {
         return;
     }
 
-    var elementComputedStyle = window.getComputedStyle(element),
-        initialDisplay       = elementComputedStyle.display || '';
+    element.style.display = '';
 
-    if (initialDisplay === 'none') {
-        element.style.display = '';
-    }
-
-    // Fix to the 'display none & transform' bug.
-    setTimeout(callbackFunction, 50);
+    setTimeout(callbackFunction, 10);
 };
 
 /*global effects */
@@ -142,29 +136,33 @@ effects.effects.fadeIn = function (element, duration, callbackFunction) {
         return;
     }
 
+    if (typeof duration === 'function') {
+        callbackFunction = duration;
+        duration = undefined;
+    }
+
     callbackFunction = callbackFunction || effects.defaults.callbackFunction;
 
     if (!effects.utils.isValidCallbackFunction(callbackFunction)) {
         return;
     }
 
-    var elementComputedStyle = window.getComputedStyle(element),
-        initialTransition    = elementComputedStyle.transition || 'initial',
-        initialDisplay       = elementComputedStyle.display || '',
-        terminate            = function () {
+    var terminate = function () {
             element.removeEventListener('transitionend', terminate, false);
-            element.style.transition = initialTransition;
+            element.style.transition = '';
             callbackFunction();
         };
 
-    duration = parseFloat(duration) || 2.5;
+    element.addEventListener('transitionend', terminate, false);
+
+    duration = parseFloat(duration) || 1;
 
     effects.effects.show(element, function () {
         element.style.transition = 'opacity ' + duration + 's linear';
-        element.style.opacity = 1;
+        setTimeout(function () {
+            element.style.opacity = '';
+        }, 10);
     });
-
-    element.addEventListener('transitionend', terminate, false);
 };
 
 /*global effects */
@@ -176,27 +174,31 @@ effects.effects.fadeOut = function (element, duration, callbackFunction) {
         return;
     }
 
+    if (typeof duration === 'function') {
+        callbackFunction = duration;
+        duration = undefined;
+    }
+
     callbackFunction = callbackFunction || effects.defaults.callbackFunction;
 
     if (!effects.utils.isValidCallbackFunction(callbackFunction)) {
         return;
     }
 
-    var elementComputedStyle = window.getComputedStyle(element),
-        initialTransition    = elementComputedStyle.transition || 'initial',
-        terminate            = function () {
+    var terminate = function () {
             element.removeEventListener('transitionend', terminate, false);
-            element.style.transition = initialTransition;
-            effects.effects.hide(element);
-            callbackFunction();
+            element.style.transition = '';
+            effects.effects.hide(element, callbackFunction);
         };
 
-    duration = parseFloat(duration) || 2.5;
+    element.addEventListener('transitionend', terminate, false);
+
+    duration = parseFloat(duration) || 1;
 
     element.style.transition = 'opacity ' + duration + 's linear';
-    element.style.opacity = 0;
-
-    element.addEventListener('transitionend', terminate, false);
+    setTimeout(function () {
+        element.style.opacity = 0;
+    }, 10);
 };
 
 /*global effects */
@@ -208,58 +210,51 @@ effects.effects.pulsate = function (element, times, duration, callbackFunction) 
         return;
     }
 
+    if (typeof times === 'function') {
+        callbackFunction = times;
+        times = duration = undefined;
+    }
+
+    if (typeof duration === 'function') {
+        callbackFunction = duration;
+        duration = undefined;
+    }
+
     callbackFunction = callbackFunction || effects.defaults.callbackFunction;
 
     if (!effects.utils.isValidCallbackFunction(callbackFunction)) {
         return;
     }
 
-    var elementComputedStyle   = window.getComputedStyle(element),
-        initialAnimation       = elementComputedStyle.animation ||
-                                 elementComputedStyle.webkitAnimation ||
-                                 elementComputedStyle.mozAnimation ||
-                                 elementComputedStyle.msAnimation ||
-                                 elementComputedStyle.oAnimation ||
-                                 'initial',
-        initialOpacity         = elementComputedStyle.opacity || 1,
-        keyframes              = ' pulsate { from { opacity: 0; } to { opacity: ' + initialOpacity + '; } } ',
-        head                   = document.head || document.getElementsByTagName('head')[0],
-        style                  = document.createElement('style'),
-        css                    = document.createTextNode(''),
-        terminate              = function () {
+    var keyframes     = ' pulsate { from { opacity: 0; } to { opacity: ; } } ',
+        documentHead  = document.head || document.getElementsByTagName('head')[0],
+        style         = document.createElement('style'),
+        css           = document.createTextNode(''),
+        terminate     = function () {
             effects.css.prefixes.common.forEach(function (prefix) {
-                var animationSuffix = (!prefix) ? 'animation' : 'Animation',
-                    animationEndSuffix = (!prefix) ? 'animationend' : 'AnimationEnd';
-
-                element.style[prefix + animationSuffix] = initialAnimation;
-                element.removeEventListener(prefix + animationEndSuffix, terminate, false);
+                element.style[prefix + ((!prefix) ? 'animation' : 'Animation')] = '';
+                element.removeEventListener(prefix + ((!prefix) ? 'animationend' : 'AnimationEnd'), terminate, false);
             });
-            head.removeChild(style);
+
+            documentHead.removeChild(style);
             callbackFunction();
         },
-        animation,
-        animationSuffix,
-        animationEndSuffix;
+        animation;
+
+    times = parseInt(times, 10) || 3;
+    duration = parseFloat(duration) || 0.25;
+    animation = 'pulsate ' + duration + 's linear 0s ' + times;
 
     effects.css.prefixes.keyframes.forEach(function (prefix) {
         css.textContent += (prefix + 'keyframes' + keyframes);
     });
 
     style.appendChild(css);
-    head.appendChild(style);
+    documentHead.appendChild(style);
 
-    times = parseInt(times, 10) || 3;
-    duration = parseFloat(duration) || 0.5;
-
-    animation = 'pulsate ' + duration + 's ease-in-out 0s ' + times;
-
-    // TODO: avoid code redundancy (terminate function)
     effects.css.prefixes.common.forEach(function (prefix) {
-        animationSuffix = (!prefix) ? 'animation' : 'Animation';
-        animationEndSuffix = (!prefix) ? 'animationend' : 'AnimationEnd';
-
-        element.style[prefix + animationSuffix] = animation;
-        element.addEventListener(prefix + animationEndSuffix, terminate, false);
+        element.style[prefix + ((!prefix) ? 'animation' : 'Animation')] = animation;
+        element.addEventListener(prefix + ((!prefix) ? 'animationend' : 'AnimationEnd'), terminate, false);
     });
 };
 
@@ -272,6 +267,16 @@ effects.effects.rotateZ = function (element, degrees, duration, callbackFunction
         return;
     }
 
+    if (typeof degrees === 'function') {
+        callbackFunction = degrees;
+        degrees = duration = undefined;
+    }
+
+    if (typeof duration === 'function') {
+        callbackFunction = duration;
+        duration = undefined;
+    }
+
     callbackFunction = callbackFunction || effects.defaults.callbackFunction;
 
     if (!effects.utils.isValidCallbackFunction(callbackFunction)) {
@@ -279,19 +284,20 @@ effects.effects.rotateZ = function (element, degrees, duration, callbackFunction
     }
 
     var elementComputedStyle = window.getComputedStyle(element),
-        initialTransition    = elementComputedStyle.transition || 'initial',
         initialDegrees       = effects.utils.matrixToDegrees(elementComputedStyle.transform) || 0,
         finalDegrees         = initialDegrees + (parseFloat(degrees, 10) || 360),
         terminate            = function () {
             element.removeEventListener('transitionend', terminate, false);
-            element.style.transition = initialTransition;
+            element.style.transition = '';
             callbackFunction();
         };
+
+    element.addEventListener('transitionend', terminate, false);
 
     duration = parseFloat(duration) || 2.5;
 
     element.style.transition = 'transform ' + duration + 's linear';
-    element.style.transform = 'rotate(' + finalDegrees + 'deg)';
-
-    element.addEventListener('transitionend', terminate, false);
+    setTimeout(function () {
+        element.style.transform = 'rotate(' + finalDegrees + 'deg)';
+    }, 10);
 };

@@ -8,7 +8,8 @@ module.exports = function (grunt) {
 
         jshint: {
             all: ['gruntfile.js', 'src/*.js', 'src/**/*.js'],
-            dev: ['src/*.js', 'src/**/*.js']
+            dev: ['src/*.js', 'src/**/*.js'],
+            production: ['build/dev/effects.js']
         },
 
         concat: {
@@ -31,6 +32,14 @@ module.exports = function (grunt) {
             }
         },
 
+        uglify: {
+            production: {
+                files: {
+                    'build/production/effects.min.js': ['build/dev/effects.js']
+                }
+            }
+        },
+
         watch: {
             dev: {
                 files: [
@@ -44,8 +53,10 @@ module.exports = function (grunt) {
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('dev', ['jshint:dev', 'concat:dev']);
+    grunt.registerTask('build', ['jshint:dev', 'concat:dev', 'jshint:production', 'uglify:production']);
     grunt.registerTask('default', ['dev']);
 };
