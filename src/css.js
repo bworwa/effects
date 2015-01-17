@@ -4,3 +4,7 @@ effects.css.prefixes = {
     common: ['', 'webkit', 'moz', 'ms', 'o'],
     keyframes: ['@', '@-webkit-', '@-moz-', '@-ms-', '@-o-']
 };
+
+effects.css.classes = {
+    fading: 'effects-fading'
+};

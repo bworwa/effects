@@ -21,6 +21,7 @@ module.exports = function (grunt) {
                     'src/utils/isvalidelement.js',
                     'src/utils/isvalidcallbackfunction.js',
                     'src/utils/matrixtodegrees.js',
+                    'src/utils/isvisible.js',
                     'src/effects/hide.js',
                     'src/effects/show.js',
                     'src/effects/fadein.js',
