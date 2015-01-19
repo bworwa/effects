@@ -6,5 +6,7 @@ effects.css.prefixes = {
 };
 
 effects.css.classes = {
-    fading: 'effects-fading'
+    fading: 'effects-fading',
+    rotating: 'effects-rotating',
+    pulsating: 'effects-pulsating'
 };

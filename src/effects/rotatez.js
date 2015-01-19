@@ -7,6 +7,10 @@ effects.effects.rotateZ = function (element, degrees, duration, callbackFunction
         return;
     }
 
+    if (element.classList.contains(effects.css.classes.rotating)) {
+        return;
+    }
+
     if (typeof degrees === 'function') {
         callbackFunction = degrees;
         degrees = duration = undefined;
@@ -29,8 +33,16 @@ effects.effects.rotateZ = function (element, degrees, duration, callbackFunction
         terminate            = function () {
             element.removeEventListener('transitionend', terminate, false);
             element.style.transition = '';
+            element.classList.remove(effects.css.classes.rotating);
             callbackFunction();
         };
+
+    if (!effects.utils.isVisible(element)) {
+        terminate();
+        return;
+    }
+
+    element.classList.add(effects.css.classes.rotating);
 
     element.addEventListener('transitionend', terminate, false);
 

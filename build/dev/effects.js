@@ -18,7 +18,9 @@ effects.css.prefixes = {
 };
 
 effects.css.classes = {
-    fading: 'effects-fading'
+    fading: 'effects-fading',
+    rotating: 'effects-rotating',
+    pulsating: 'effects-pulsating'
 };
 
 /*global effects */
@@ -268,6 +270,10 @@ effects.effects.pulsate = function (element, times, duration, callbackFunction) 
         return;
     }
 
+    if (element.classList.contains(effects.css.classes.pulsating)) {
+        return;
+    }
+
     if (typeof times === 'function') {
         callbackFunction = times;
         times = duration = undefined;
@@ -295,9 +301,18 @@ effects.effects.pulsate = function (element, times, duration, callbackFunction) 
             });
 
             documentHead.removeChild(style);
+            element.classList.remove(effects.css.classes.pulsating);
+
             callbackFunction();
         },
         animation;
+
+    if (!effects.utils.isVisible(element)) {
+        terminate();
+        return;
+    }
+
+    element.classList.add(effects.css.classes.pulsating);
 
     times = parseInt(times, 10) || 3;
     duration = parseFloat(duration) || 0.25;
@@ -325,6 +340,10 @@ effects.effects.rotateZ = function (element, degrees, duration, callbackFunction
         return;
     }
 
+    if (element.classList.contains(effects.css.classes.rotating)) {
+        return;
+    }
+
     if (typeof degrees === 'function') {
         callbackFunction = degrees;
         degrees = duration = undefined;
@@ -347,8 +366,16 @@ effects.effects.rotateZ = function (element, degrees, duration, callbackFunction
         terminate            = function () {
             element.removeEventListener('transitionend', terminate, false);
             element.style.transition = '';
+            element.classList.remove(effects.css.classes.rotating);
             callbackFunction();
         };
+
+    if (!effects.utils.isVisible(element)) {
+        terminate();
+        return;
+    }
+
+    element.classList.add(effects.css.classes.rotating);
 
     element.addEventListener('transitionend', terminate, false);
 
